@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* @layer components {
+  .nav-button {
+    @apply bg-gradient-to-r from-[#4776E6] via-[#8E54E9] to-[#4776E6] 
+            px-3 py-3 text-center uppercase transition-0.5s
+           bg-[length:200%_auto] text-white shadow-lg rounded-xl block
+            hover:background-position: right center 
+            hover:color: #fff 
+            hover: text-decoration: none;
+  }
+} */
+
+@layer components {
+  .nav-button {
+    @apply bg-gradient-to-r from-[#4776E6] via-[#8E54E9] to-[#4776E6]
+           px-3 py-3 text-center uppercase transition-all duration-500
+           bg-[length:200%_auto] text-white shadow-lg rounded-xl block;
+    &:hover {
+      @apply bg-[position:right_center] text-white no-underline;
+    }
+  }
+  .main{
+    @apply h-[calc(100vh-100px)] overscroll-contain bg-neutral-400
+  }
+
+  .button{
+    @apply  text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5  dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900
+  }
+  .spinner {
+    @apply w-24 h-24 rounded-full;
+    background: conic-gradient(#0000 10%, var(--color-light--2));
+    -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+  }
+
+  @keyframes spinner-rotate {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  .animate-spinner {
+    animation: spinner-rotate 1.5s linear infinite;
+  }
+  
+}
