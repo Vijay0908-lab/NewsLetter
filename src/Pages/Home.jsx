@@ -1,59 +1,33 @@
-// import {  useState } from "react";
-// import { useNews } from "../Services/HomeApi";
-// import News from "../../Components/News";
-// import Spinner from "../../Components/Spinner";
-
-
-// function Home() {
-//   const{currentNews , isLoading}  = useNews();
-//   const [SearchValue , setsearchValue] = useState("");
- 
-
-// console.log(currentNews);
-
-//   return <div >
-//     <div className=" flex items-center justify-center gap-2 mt-2">
-
-//     <form >
-//     <input 
-//     className="border  w-2xs rounded-2xl bg-stone-50 p font-medium  text-sm px-5 py-2.5  "
-//     type="search"
-//     placeholder="Search the category"
-//     value = {SearchValue} 
-//     onChange={(e)=>setsearchValue(e.target.value)}
-//     />
-//     <button className="button">Search</button>
-//     </form>
-//     </div>
-//     <div  className="h-full bg-amber-200">
-//       {isLoading ? <Spinner /> : <News  currentNews={currentNews} /> }
-//     </div>
-    
-  
-//   </div>;
-// }
-
-// export default Home;
-
 
 import { useState } from "react";
 import { useNews } from "../Services/HomeApi";
-import News from "../../Components/News";
 import Spinner from "../../Components/Spinner";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const { currentNews, isLoading } = useNews();
   const [SearchValue, setsearchValue] = useState("");
 
+const navigate = useNavigate();
+
+  function handleSubmit(e){
+    e.preventDefault();
+    if(SearchValue.trim()){
+     navigate(`/${SearchValue}`);
+    }
+    
+
+  }
+  
   console.log(currentNews);
 
   return (
     <div className="min-h-screen ">
-      {/* Header Section with Search - Fixed height */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+     
+      <div className="bg-neutral-400 shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-4">
-            <form className="w-full max-w-md">
+            <form className="w-full max-w-md" onSubmit={handleSubmit}>
               <div className="flex gap-2">
                 <input
                   className="flex-1 border border-gray-300 rounded-lg bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -65,6 +39,7 @@ function Home() {
                 <button 
                   type="submit"
                   className="button"
+                 
                 >
                   Search
                 </button>
@@ -74,7 +49,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Main Content Area - Takes remaining height */}
+     
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="min-h-[calc(100vh-120px)]">
           {isLoading ? (
@@ -82,9 +57,22 @@ function Home() {
               <Spinner />
             </div>
           ) : (
-            <div className="w-full">
-              <News currentNews={currentNews} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        {currentNews.map((news) => (
+          <div
+            key={news.article_id}
+            className="w-full rounded-xl overflow-hidden shadow-lg bg-amber-50 text-gray-900 transition-transform transform hover:scale-102"
+          >
+            <a href={news.link}>
+            <img src={news.image_url} className="w-full h-32 object-cover" alt={news.title} />
+            <div className="p-4 fornt-sans-serif">
+              <span className="font-extrabold text-base block">{news.title}</span>
+              <p className="mt-2 text-xs line-clamp-3 ">{news.description}</p>
             </div>
+            </a>
+          </div>
+        ))}
+      </div>
           )}
         </div>
       </main>

@@ -1,4 +1,4 @@
-import { FaLeftRight } from "react-icons/fa6"
+
 import { ClipLoader } from "react-spinners"
 
 
