@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* @layer components {
   .nav-button {
     @apply bg-gradient-to-r from-[#4776E6] via-[#8E54E9] to-[#4776E6] 

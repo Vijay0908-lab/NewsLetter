@@ -18,9 +18,6 @@ const navigate = useNavigate();
     
 
   }
-  
-  console.log(currentNews);
-
   return (
     <div className="min-h-screen ">
      

@@ -1,4 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+
+import { MapContainer } from "react-leaflet";
 import { NewsProvider } from "./Services/HomeApi";
 import Home from "./Pages/Home";
 import Applayout from "./Pages/Applayout";
