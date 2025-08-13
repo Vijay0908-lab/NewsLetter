@@ -14,7 +14,7 @@
 
 @layer components {
   .nav-button {
-    @apply bg-gradient-to-r from-[#4776E6] via-[#8E54E9] to-[#4776E6]
+    @apply bg-gradient-to-r from-[#4776E6] via-[rgb(142,84,233)] to-[#4776E6]
            px-3 py-3 text-center uppercase transition-all duration-500
            bg-[length:200%_auto] text-white shadow-lg rounded-xl block;
     &:hover {
@@ -25,9 +25,9 @@
     @apply h-full overscroll-contain bg-neutral-400
   }
 
-  .button{
-    @apply  text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5  dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-300
-  }
+  .button {
+  @apply text-white bg-purple-700 hover:bg-purple-800 focus-visible:ring-4 focus-visible:ring-purple-800 active:ring-0 active:scale-95 font-medium rounded-lg text-sm px-5 py-2.5 transition-all duration-150;
+}
   .spinner {
     @apply w-24 h-24 rounded-full;
     background: conic-gradient(#0000 10%, var(--color-light--2));

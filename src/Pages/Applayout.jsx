@@ -5,9 +5,9 @@ import Footer from "./Footer";
 function Applayout() {
   return (
     <>
-      <div className="h-full bg-neutral-400">
+      <div className="flex flex-col min-h-dvh bg-neutral-400">
         <Header />
-        <main className="main"> 
+        <main className="flex-1 overflow-auto"> 
           <Outlet />
         </main>
         <Footer />
