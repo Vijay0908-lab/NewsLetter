@@ -1,5 +1,4 @@
 
-
 import { useEffect, useState } from "react";
 import { useNews } from "../Services/HomeApi";
 import { WiDayFog, WiDayWindy, WiNightAltSprinkle } from "react-icons/wi";
@@ -14,10 +13,11 @@ import {
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useUrlPosition } from "../hooks/useUrlPosition";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../../Components/Spinner";
 
 function Weather() {
   const [city, setcity] = useState("");
-  const { weatherData, weatherLoading } = useNews();
+  const { searchWeatherByCity, weatherLoading, weatherData } = useNews();
   
   const [mapPosition, setMapPosition] = useState([40, 0]);
   const {
@@ -43,19 +43,45 @@ function Weather() {
     [geolocationPosition]
   );
 
-  const handleSubmit = (e) => {
-    console.log("=== BUTTON CLICKED ===");
+  useEffect(
+    function () {
+      if (weatherData?.coord) {
+        setMapPosition([weatherData.coord.lat, weatherData.coord.lon]);
+      }
+    },
+    [weatherData]
+  );
+
+  function handleSubmit(e) {
     e.preventDefault();
-    console.log("Event prevented");
-    
     if (!city.trim()) {
       console.log("City is empty:", city);
       return;
     }
-    
-    console.log("Searching for:", city);
+    searchWeatherByCity(city);
+    setcity(""); // Clear the input after search
+  }
+
+  // Helper function to convert temperature to Celsius
+  const kelvinToCelsius = (kelvin) => {
+    return Math.round(kelvin - 273.15);
   };
 
+  // Helper function to get temperature in Celsius
+  const getTemperatureInCelsius = () => {
+    if (weatherData?.main?.temp) {
+      
+      if (weatherData.main.temp > 200) {
+        return kelvinToCelsius(weatherData.main.temp);
+      }
+      
+      return Math.round(weatherData.main.temp);
+    }
+    return 21; // Default value
+  };
+
+  console.log(weatherData);
+  
   return (
     <div className="h-full grid grid-cols-2">
       {/* Your existing weather card - unchanged */}
@@ -78,30 +104,45 @@ function Weather() {
           </form>
         </div>
         
-        <div className="h-70 flex items-center justify-center flex-col">
-          <WiDayFog className="h-40 w-40 text-white" />
-          <h1 className="font-bold text-lg text-white">21 &#8451;</h1>
-          <h3 className="font-bold text-white text-lg">Mumbai, India</h3>
-        </div>
-        
-        <div className="h-40 w-full flex items-center justify-center gap-23">
-          <div className="flex items-center justify-center text-white">
-            <WiDayWindy className="h-20 w-20" />
-            <div>
-              <p>28%</p>
-              <p>Humidity</p>
+        {weatherLoading ? (
+          <Spinner className=" h-70  flex items-center justify-center "/>
+        ) : (
+          <>
+            <div className="h-70 flex items-center justify-center flex-col">
+              <WiDayFog className="h-40 w-40 text-white" />
+              <h1 className="font-bold text-lg text-white">
+                {getTemperatureInCelsius()} &#8451;
+              </h1>
+              <h3 className="font-bold text-white text-lg">
+                {weatherData?.name && weatherData?.sys?.country 
+                  ? `${weatherData.name}, ${weatherData.sys.country}`
+                  : weatherData?.name 
+                    ? weatherData.name
+                    : "Mumbai, India"
+                }
+              </h3>
             </div>
-          </div>
-          <div className="flex items-center justify-center text-white">
-            <WiNightAltSprinkle className="h-20 w-20 text-white" />
-            <div>
-              <p>28%</p>
-              <p>Humidity</p>
+            
+            <div className="h-40 w-full flex items-center justify-center gap-23">
+              <div className="flex items-center justify-center text-white">
+                <WiDayWindy className="h-20 w-20" />
+                <div>
+                  <p>{weatherData?.main?.humidity || 28}%</p>
+                  <p>Humidity</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-center text-white">
+                <WiNightAltSprinkle className="h-20 w-20 text-white" />
+                <div>
+                  <p>{weatherData?.wind?.speed ? Math.round(weatherData.wind.speed) : 28}%</p>
+                  <p>Wind Speed</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
-
+      
       {/* Map container styled like a card */}
       <div className="rounded-xl shadow-lg overflow-hidden h-128 m-10 sm:64 w-170 sm:64 hover:shadow-2xl relative bg-white ml-3">
         {!geolocationPosition && !isLoadingPosition && (
@@ -129,6 +170,19 @@ function Weather() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
           />
+          {weatherData?.coord && (
+            <Marker position={[weatherData.coord.lat, weatherData.coord.lon]}>
+              <Popup>
+                <div className="text-center">
+                  <strong>{weatherData.name}</strong>
+                  <br />
+                  {getTemperatureInCelsius()}°C
+                  <br />
+                  Humidity: {weatherData?.main?.humidity || 'N/A'}%
+                </div>
+              </Popup>
+            </Marker>
+          )}
           <ChangeCenter position={mapPosition} />
           <DetectClick />
         </MapContainer>
@@ -146,7 +200,7 @@ function ChangeCenter({ position }) {
 function DetectClick() {
   const navigate = useNavigate();
   useMapEvent({
-    click: (e) => navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`)
+    click: (e) => navigate(`lat=${e.latlng.lat}&lng=${e.latlng.lng}`)
   });
   return null;
 }
