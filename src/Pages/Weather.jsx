@@ -1,4 +1,7 @@
 
+
+
+
 import { useEffect, useState } from "react";
 import { useNews } from "../Services/HomeApi";
 import { WiDayFog, WiDayWindy, WiNightAltSprinkle } from "react-icons/wi";
@@ -18,11 +21,16 @@ import Spinner from "../../Components/Spinner";
 function Weather() {
   const [city, setcity] = useState("");
   const { searchWeatherByCity, weatherLoading, weatherData } = useNews();
+  const{ searchWeatherByMap ,weatherLoadingByMap,weatherDataByMap } = useNews();
   
-  const [mapPosition, setMapPosition] = useState([40, 0]);
+  const[displayMode , setDisplayMode] = useState("default");
+
+  const [mapPosition, setMapPosition] = useState([19.2 , 72.83]);
+
   const {
     isLoading: isLoadingPosition,
     position: geolocationPosition,
+    
     getPosition,
   } = useGeolocation();
  
@@ -52,12 +60,21 @@ function Weather() {
     [weatherData]
   );
 
+
+  function handleMapClick(lat , lng){
+    setDisplayMode("map");
+      searchWeatherByMap(lat , lng);
+  }
+
+
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!city.trim()) {
       console.log("City is empty:", city);
       return;
     }
+    setDisplayMode("city");
     searchWeatherByCity(city);
     setcity(""); // Clear the input after search
   }
@@ -67,20 +84,37 @@ function Weather() {
     return Math.round(kelvin - 273.15);
   };
 
+
+  const getCurrentWeatherData = function(){
+       if(displayMode === "map" && weatherDataByMap && Object.keys(weatherDataByMap).length >0){
+        return weatherDataByMap;
+       }else if (displayMode === "city" && weatherData && Object.keys(weatherData).length>0){
+        return weatherData ;
+       }
+       return null;
+
+  };
+
   // Helper function to get temperature in Celsius
   const getTemperatureInCelsius = () => {
-    if (weatherData?.main?.temp) {
-      
-      if (weatherData.main.temp > 200) {
-        return kelvinToCelsius(weatherData.main.temp);
+    const currentData = getCurrentWeatherData();
+    if(currentData?.main?.temp){
+      if(currentData.main.temp >200){
+        return kelvinToCelsius(currentData.main.temp);
       }
-      
-      return Math.round(weatherData.main.temp);
+      return Math.round(currentData.main.temp);
     }
     return 21; // Default value
   };
+   
 
-  console.log(weatherData);
+  const isCurrentLoading = ()=>{
+    return (displayMode === "city" && weatherLoading) || 
+           (displayMode === "map" && weatherDataByMap);
+  }
+
+  const currentData = getCurrentWeatherData();
+  console.log(currentData);
   
   return (
     <div className="h-full grid grid-cols-2">
@@ -114,12 +148,8 @@ function Weather() {
                 {getTemperatureInCelsius()} &#8451;
               </h1>
               <h3 className="font-bold text-white text-lg">
-                {weatherData?.name && weatherData?.sys?.country 
-                  ? `${weatherData.name}, ${weatherData.sys.country}`
-                  : weatherData?.name 
-                    ? weatherData.name
-                    : "Mumbai, India"
-                }
+               {currentData?.name && currentData?.sys?.country ? `${currentData.name} , ${currentData.sys.country}` : currentData?.name ? currentData.name : "Mumbai , India"
+               }
               </h3>
             </div>
             
@@ -127,14 +157,14 @@ function Weather() {
               <div className="flex items-center justify-center text-white">
                 <WiDayWindy className="h-20 w-20" />
                 <div>
-                  <p>{weatherData?.main?.humidity || 28}%</p>
+                  <p>{currentData?.main?.humidity || 28}%</p>
                   <p>Humidity</p>
                 </div>
               </div>
               <div className="flex items-center justify-center text-white">
                 <WiNightAltSprinkle className="h-20 w-20 text-white" />
                 <div>
-                  <p>{weatherData?.wind?.speed ? Math.round(weatherData.wind.speed) : 28}%</p>
+                  <p>{currentData?.wind?.speed? Math.round(weatherData.wind?.speed) : 28}Km/hr</p>
                   <p>Wind Speed</p>
                 </div>
               </div>
@@ -145,21 +175,15 @@ function Weather() {
       
       {/* Map container styled like a card */}
       <div className="rounded-xl shadow-lg overflow-hidden h-128 m-10 sm:64 w-170 sm:64 hover:shadow-2xl relative bg-white ml-3">
-        {!geolocationPosition && !isLoadingPosition && (
-          <button 
-            type="button" 
-            onClick={getPosition} 
-            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg shadow-md"
-          >
-            Use your position
+       {
+        !geolocationPosition && (
+          <button type="button" 
+          onClick={getPosition}
+           className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg shadow-md">
+            {isLoadingPosition ? "Loading..." : "Use your position"}
           </button>
-        )}
-        
-        {isLoadingPosition && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-purple-700 text-white px-4 py-2 rounded-lg shadow-md">
-            Loading...
-          </div>
-        )}
+        )
+       }
         <MapContainer
           center={mapPosition}
           zoom={6}
@@ -170,21 +194,35 @@ function Weather() {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
           />
-          {weatherData?.coord && (
+          {displayMode === "city" && weatherData?.coord && (
             <Marker position={[weatherData.coord.lat, weatherData.coord.lon]}>
               <Popup>
                 <div className="text-center">
                   <strong>{weatherData.name}</strong>
                   <br />
-                  {getTemperatureInCelsius()}°C
+                  {kelvinToCelsius(weatherData.main.temp)}°C
                   <br />
                   Humidity: {weatherData?.main?.humidity || 'N/A'}%
                 </div>
               </Popup>
             </Marker>
           )}
+
+          {displayMode === "map" && weatherDataByMap?.coord && (
+            <Marker position={[weatherDataByMap.coord.lat, weatherDataByMap.coord.lon]}>
+              <Popup>
+                <div className="text-center">
+                  <strong>{weatherDataByMap.name}</strong>
+                  <br />
+                  {kelvinToCelsius(weatherDataByMap.main.temp)}°C
+                  <br />
+                  Humidity: {weatherDataByMap?.main?.humidity || 'N/A'}%
+                </div>
+              </Popup>
+            </Marker>
+          )}
           <ChangeCenter position={mapPosition} />
-          <DetectClick />
+          <DetectClick  onMapClick = {handleMapClick}/>
         </MapContainer>
       </div>
     </div>
@@ -197,12 +235,14 @@ function ChangeCenter({ position }) {
   return null;
 }
 
-function DetectClick() {
+function DetectClick({onMapClick}){
   const navigate = useNavigate();
   useMapEvent({
-    click: (e) => navigate(`lat=${e.latlng.lat}&lng=${e.latlng.lng}`)
+      click:(e)=>{
+    navigate(`?lat=${e.latlng.lat}&lng=${e.latlng.lng}`);
+    onMapClick(e.latlng.lat , e.latlng.lng);
+   }
   });
   return null;
 }
-
 export default Weather;

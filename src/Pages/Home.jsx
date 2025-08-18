@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNews } from "../Services/HomeApi";
 import Spinner from "../../Components/Spinner";
 import { useNavigate } from "react-router-dom";
+import { NewsCard } from "../ui/NewsCard";
 
 function Home() {
   const { currentNews, isLoading } = useNews();
@@ -56,18 +57,7 @@ const navigate = useNavigate();
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         {currentNews.map((news) => (
-          <div
-            key={news.article_id}
-            className="w-full rounded-xl overflow-hidden shadow-lg bg-amber-50 text-gray-900 transition-transform transform hover:scale-102"
-          >
-            <a href={news.link}>
-            <img src={news.image_url} className="w-full h-32 object-cover" alt={news.title} />
-            <div className="p-4 font-sans-serif">
-              <span className="font-extrabold text-base block">{news.title}</span>
-              <p className="mt-2 text-xs line-clamp-3 ">{news.description}</p>
-            </div>
-            </a>
-          </div>
+          <NewsCard news = {news} key={news.article_id}/>
         ))}
       </div>
           )}

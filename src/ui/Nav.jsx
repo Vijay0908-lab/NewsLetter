@@ -7,15 +7,16 @@ function Nav() {
         <li className="nav-button">
           <NavLink to="/weather">weather</NavLink>
         </li>
+        <li className="nav-button w-20">
+          <NavLink to="/top">top</NavLink>
+        </li>
         <li className="nav-button">
-          <NavLink to="/entertainment">entertainment</NavLink>
+          <NavLink to="/social">social</NavLink>
         </li>
         <li className="nav-button">
           <NavLink to="/sports">sports</NavLink>
         </li>
-        <li className="nav-button">
-          <NavLink to="/miscellaneous">miscellaneous</NavLink>
-        </li>
+        
       </ul>
     </nav>
   );
